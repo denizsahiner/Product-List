@@ -1,0 +1,59 @@
+import { NextResponse } from "next/server";
+import productsData from "@/data/products.json";
+import { getGoldPrice } from "@/lib/api";
+import { Product } from "@/lib/types";
+
+export async function GET(request: Request) {
+  try {
+    const goldPrice = await getGoldPrice();
+    if (goldPrice === null) {
+      return NextResponse.json(
+        { message: "Failed to retrieve gold price." },
+        { status: 500 }
+      );
+    }
+    const ounce_to_gram=28.35;
+    const productsWithPrice: Product[] = (productsData as Product[]).map(
+      (product) => {
+        const calculatedPrice =
+          (product.popularityScore + 1) * product.weight * goldPrice/ounce_to_gram;
+        return {
+          ...product,
+          price: parseFloat(calculatedPrice.toFixed(2)),
+        };
+      }
+    );
+
+    const { searchParams } = new URL(request.url);
+    const minPrice = searchParams.get("minPrice");
+    const maxPrice = searchParams.get("maxPrice");
+    const minPopularity = searchParams.get("minPopularity");
+
+    let filteredProducts = productsWithPrice;
+
+    if (minPrice) {
+      filteredProducts = filteredProducts.filter(
+        (p) => p.price && p.price >= parseFloat(minPrice)
+      );
+    }
+    if (maxPrice) {
+      filteredProducts = filteredProducts.filter(
+        (p) => p.price && p.price <= parseFloat(maxPrice)
+      );
+    }
+    if (minPopularity) {
+      filteredProducts = filteredProducts.filter(
+        (p) =>
+          p.popularityScore && p.popularityScore >= parseFloat(minPopularity)
+      );
+    }
+
+    return NextResponse.json(filteredProducts);
+  } catch (error) {
+    console.error("error in products API:", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
