@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 
 interface CardSliderProps {
   children: React.ReactNode[];
+
   cardsToShow?: number;
 }
 
@@ -13,7 +14,31 @@ const CardSlider: React.FC<CardSliderProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
   const totalCards = React.Children.count(children);
-  const maxIndex = Math.max(0, totalCards - cardsToShow);
+
+  const [responsiveCardsToShow, setResponsiveCardsToShow] =
+    useState(cardsToShow);
+
+  const maxIndex = Math.max(0, totalCards - responsiveCardsToShow);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+
+      if (width >= 1024) {
+        setResponsiveCardsToShow(4);
+      } else if (width >= 768) {
+        setResponsiveCardsToShow(3);
+      } else if (width >= 640) {
+        setResponsiveCardsToShow(2);
+      } else {
+        setResponsiveCardsToShow(1);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) => {
@@ -36,20 +61,21 @@ const CardSlider: React.FC<CardSliderProps> = ({
   useEffect(() => {
     if (sliderRef.current && sliderRef.current.children.length > 0) {
       const firstChild = sliderRef.current.children[0] as HTMLElement;
+
       const cardWithGap = firstChild.offsetWidth + 16;
 
       sliderRef.current.style.transform = `translateX(-${
         currentIndex * cardWithGap
       }px)`;
     }
-  }, [currentIndex, cardsToShow, children]);
+  }, [currentIndex, responsiveCardsToShow, children]);
 
   return (
     <div className="relative w-full overflow-hidden">
       <button
         onClick={handlePrev}
         className="
-          absolute left-10 top-2/5 -translate-y-1/2 
+          absolute left-4 md:left-10 top-2/5 -translate-y-1/2 
           p-2 z-10
           focus:outline-none 
           disabled:opacity-50 disabled:cursor-not-allowed
@@ -73,7 +99,7 @@ const CardSlider: React.FC<CardSliderProps> = ({
         </svg>
       </button>
 
-      <div className="mx-20">
+      <div className="mx-4 md:mx-20">
         <div
           className="flex flex-nowrap transition-transform duration-300 ease-in-out gap-4"
           ref={sliderRef}
@@ -83,7 +109,9 @@ const CardSlider: React.FC<CardSliderProps> = ({
               key={index}
               className="flex-none"
               style={{
-                width: `calc((100% - ${16 * (cardsToShow - 1)}px) / ${cardsToShow})`,
+                width: `calc((100% - ${
+                  16 * (responsiveCardsToShow - 1)
+                }px) / ${responsiveCardsToShow})`,
               }}
             >
               {child}
@@ -94,7 +122,7 @@ const CardSlider: React.FC<CardSliderProps> = ({
       <button
         onClick={handleNext}
         className="
-          absolute right-10 top-2/5 -translate-y-1/2 
+          absolute right-4 md:right-10 top-2/5 -translate-y-1/2 
           p-2 z-10
           focus:outline-none 
           disabled:opacity-50 disabled:cursor-not-allowed

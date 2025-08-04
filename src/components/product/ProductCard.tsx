@@ -40,28 +40,32 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="min-w-[500px] max-w-[500px] min-h-[600px] max-h-[600px] p-4 m-10">
+
+  <div className="w-full flex-shrink-0 p-2 md:p-4">
+    <div className="relative overflow-hidden rounded-3xl"> 
       <img
         src={product.images[selectedColor]}
         alt={product.name}
-        className="rounded-3xl h-70 w-70 mb-4"
+        className="max-w-full h-auto object-cover w-full" 
+        style={{ aspectRatio: '1/1' }} 
       />
+    </div>
 
-      <h2 className="font-montserrat-medium text-[15px] mt-4 font-semibold">
+      <h2 className="font-montserrat-medium text-[15px] mt-2 md:mt-4 font-semibold">
         {product.name}
       </h2>
 
-      <h3 className="font-montserrat-regular text-[15px] mt-1 mb-3">
+      <h3 className="font-montserrat-regular text-[14px] md:text-[15px] mt-1 mb-2 md:mb-3">
         ${product.price} USD
       </h3>
 
-      <div className="flex gap-2 mb-3">
+      <div className="flex gap-2 mb-2 md:mb-3">
         {colorOptions.map((color) => (
           <button
             key={color.key}
             onClick={() => setSelectedColor(color.key)}
             className={`
-              w-6 h-6 rounded-full transition-all duration-200 p-0.5
+              w-5 h-5 md:w-6 md:h-6 rounded-full transition-all duration-200 p-0.5
               ${
                 selectedColor === color.key
                   ? "border border-black"
@@ -73,7 +77,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </button>
         ))}
       </div>
-      <p className="font-avenir-book text-[12px] text-sm text-gray-600 mb-2">
+      <p className="font-avenir-book text-[11px] md:text-[12px] text-sm text-gray-600 mb-1 md:mb-2">
         {getSelectedColorName()}
       </p>
 
