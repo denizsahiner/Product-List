@@ -5,9 +5,12 @@ import CardSlider from "@/components/common/CardSlider";
 interface ProductWithPrice extends Product {
   price: number;
 }
-
 async function getProducts(): Promise<ProductWithPrice[]> {
-  const res = await fetch("http://localhost:3000/api/products", {
+   const baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://product-list-seven-tawny.vercel.app/'
+    : 'http://localhost:3000';
+    
+  const res = await fetch(`${baseUrl}/api/products`, {
     cache: "no-store",
   });
   if (!res.ok) {
