@@ -32,23 +32,14 @@ async function getProducts(
   return res.json();
 }
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: unknown;
+export default async function Home(props: { 
+  searchParams: Promise<{ sortBy?: string; sortOrder?: string }> 
 }) {
   let products: ProductWithPrice[] = [];
   let error: string | null = null;
-  try {
-    let params: { sortBy?: string; sortOrder?: string };
-     if (searchParams && typeof searchParams === 'object' && 'then' in searchParams) {
-      // For Next.js-15
-      params = await (searchParams as Promise<{ sortBy?: string; sortOrder?: string }>);
-    } else {
-      // For Next.js-14
-      params = searchParams as { sortBy?: string; sortOrder?: string };
-    }
-    products = await getProducts(params.sortBy, params.sortOrder);
+ try {
+    const searchParams = await props.searchParams;
+    products = await getProducts(searchParams?.sortBy, searchParams?.sortOrder);
   } catch (err: unknown) {
     if (err instanceof Error) {
       error = err.message;
