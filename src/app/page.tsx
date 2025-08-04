@@ -6,13 +6,11 @@ import ProductSort from "@/components/product/ProductSort";
 interface ProductWithPrice extends Product {
   price: number;
 }
-interface HomeProps {
-  searchParams: {
-    sortBy?: string;
-    sortOrder?: string;
-  };
-}
-async function getProducts(sortBy?: string, sortOrder?: string): Promise<ProductWithPrice[]> {
+
+async function getProducts(
+  sortBy?: string,
+  sortOrder?: string
+): Promise<ProductWithPrice[]> {
   const baseUrl =
     process.env.NODE_ENV === "production"
       ? "https://product-list-seven-tawny.vercel.app/"
@@ -34,12 +32,23 @@ async function getProducts(sortBy?: string, sortOrder?: string): Promise<Product
   return res.json();
 }
 
-export default async function Home({searchParams}:HomeProps) {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: unknown;
+}) {
   let products: ProductWithPrice[] = [];
   let error: string | null = null;
   try {
-    const params = await searchParams;
-    products = await getProducts(params.sortBy,params.sortOrder);
+    let params: { sortBy?: string; sortOrder?: string };
+     if (searchParams && typeof searchParams === 'object' && 'then' in searchParams) {
+      // For Next.js-15
+      params = await (searchParams as Promise<{ sortBy?: string; sortOrder?: string }>);
+    } else {
+      // For Next.js-14
+      params = searchParams as { sortBy?: string; sortOrder?: string };
+    }
+    products = await getProducts(params.sortBy, params.sortOrder);
   } catch (err: unknown) {
     if (err instanceof Error) {
       error = err.message;
