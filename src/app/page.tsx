@@ -1,7 +1,7 @@
 import { Product } from "@/lib/types";
 import ProductCard from "@/components/product/ProductCard";
 import CardSlider from "@/components/common/CardSlider";
-import ProductSort from "@/components/product/ProductSort";
+import ProductSortWrapper from "@/components/product/ProductSortWrapper";
 
 interface ProductWithPrice extends Product {
   price: number;
@@ -55,7 +55,7 @@ export default async function Home(props: {
       <h1 className="font-avenir-book text-3xl md:text-[45px] text-center mt-10 md:mt-55 mb-5 md:mb-10">
         Product List
       </h1>
-      <ProductSort />
+      <ProductSortWrapper />
       <CardSlider cardsToShow={4}>
         {products.map((product) => (
           <ProductCard key={product.name} product={product} />
