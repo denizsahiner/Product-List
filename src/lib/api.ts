@@ -1,19 +1,18 @@
-
 export async function getGoldPrice(): Promise<number | null> {
-
-  
-  const url = `https://api.gold-api.com/price/XAU`;
+const url = process.env.GOLD_API_URL || `https://api.gold-api.com/price/XAU`;
 
   try {
     const response = await fetch(url, {
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (compatible; Next.js API)"
+      },
+      signal: AbortSignal.timeout(10000)
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
       console.error(
-        'Gold API request failed: ${response.status} ${response.statusText}',
-        errorData
+        `Gold API request failed: ${response.status} ${response.statusText}`
       );
       return null;
     }

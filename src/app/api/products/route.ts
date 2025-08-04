@@ -5,18 +5,21 @@ import { Product } from "@/lib/types";
 
 export async function GET(request: Request) {
   try {
-    const goldPrice = await getGoldPrice();
-    if (goldPrice === null) {
-      return NextResponse.json(
-        { message: "Failed to retrieve gold price." },
-        { status: 500 }
-      );
+    
+    let goldPrice: number;
+    try {
+      const fetchedPrice = await getGoldPrice();
+      goldPrice = fetchedPrice || 2000; 
+    } catch (error) {
+      console.warn("Gold price API failed, using fallback:", error);
+      goldPrice = 2000; 
     }
-    const ounce_to_gram=28.35;
+
+    const ounce_to_gram = 28.35;
     const productsWithPrice: Product[] = (productsData as Product[]).map(
       (product) => {
         const calculatedPrice =
-          (product.popularityScore + 1) * product.weight * goldPrice/ounce_to_gram;
+          (product.popularityScore + 1) * product.weight * goldPrice / ounce_to_gram;
         return {
           ...product,
           price: parseFloat(calculatedPrice.toFixed(2)),
@@ -50,9 +53,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json(filteredProducts);
   } catch (error) {
-    console.error("error in products API:", error);
+    console.error("Error in products API:", error);
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { message: "Internal Server Error", error: error.message },
       { status: 500 }
     );
   }
