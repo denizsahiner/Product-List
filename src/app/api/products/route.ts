@@ -12,11 +12,12 @@ export async function GET(request: Request) {
         { status: 500 }
       );
     }
-    const ounce_to_gram=28.35;
+    const ounce_to_gram = 28.35;
     const productsWithPrice: Product[] = (productsData as Product[]).map(
       (product) => {
         const calculatedPrice =
-          (product.popularityScore + 1) * product.weight * goldPrice/ounce_to_gram;
+          ((product.popularityScore + 1) * product.weight * goldPrice) /
+          ounce_to_gram;
         return {
           ...product,
           price: parseFloat(calculatedPrice.toFixed(2)),
@@ -28,6 +29,8 @@ export async function GET(request: Request) {
     const minPrice = searchParams.get("minPrice");
     const maxPrice = searchParams.get("maxPrice");
     const minPopularity = searchParams.get("minPopularity");
+    const sortBy = searchParams.get("sortBy");
+    const sortOrder = searchParams.get("sortOrder");
 
     let filteredProducts = productsWithPrice;
 
@@ -47,7 +50,44 @@ export async function GET(request: Request) {
           p.popularityScore && p.popularityScore >= parseFloat(minPopularity)
       );
     }
+    if (sortBy && sortOrder) {
+      filteredProducts.sort((a, b) => {
+        let aValue: number, bValue: number;
 
+        switch (sortBy) {
+          case "price":
+            aValue = a.price || 0;
+            bValue = b.price || 0;
+            break;
+          case "popularity":
+            aValue = a.popularityScore || 0;
+            bValue = b.popularityScore || 0;
+            break;
+          case "weight":
+            aValue = a.weight || 0;
+            bValue = b.weight || 0;
+            break;
+          case "name":
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            if (sortOrder === "asc") {
+              return nameA.localeCompare(nameB);
+            } else {
+              return nameB.localeCompare(nameA);
+            }
+          default:
+            return 0;
+        }
+
+        if (sortOrder === "asc") {
+          return aValue - bValue;
+        } else if (sortOrder === "desc") {
+          return bValue - aValue;
+        }
+
+        return 0;
+      });
+    }
     return NextResponse.json(filteredProducts);
   } catch (error) {
     console.error("error in products API:", error);
